@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Radio, Clock, Target, Zap, RotateCcw } from 'lucide-react-native';
+import { formatMinutesSeconds } from '../utils/formatters';
 
 export default function RealTimeCalibrationCard({
   intersection,
@@ -42,7 +43,7 @@ export default function RealTimeCalibrationCard({
         <View style={styles.cycleInfoItem}>
           <Text style={styles.infoLabel}>Secunda în ciclu</Text>
           <Text style={styles.infoValue}>
-            {currentSec}s <Text style={styles.infoValueSub}>/ {totalSec}s</Text>
+            {currentSec}s <Text style={styles.infoValueSub}>/ {formatMinutesSeconds(totalSec)}</Text>
           </Text>
         </View>
 

@@ -39,3 +39,10 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Temporary & development scratch images / screenshots
+/*.png
+/*.jpg
+/*.jpeg
+docs/screenshots/
+!assets/**

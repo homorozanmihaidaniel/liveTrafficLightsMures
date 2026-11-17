@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Svg, { Rect, Circle, G, Text as SvgText, Line } from 'react-native-svg';
 import { Waves, Clock, CheckCircle2, AlertTriangle, Waypoints } from 'lucide-react-native';
+import { formatMinutesSeconds } from '../utils/formatters';
 import IntersectionVisualizer from './IntersectionVisualizer';
 import { INTERSECTIONS } from '../data/intersections';
 import { INT1_GEOMETRY } from '../data/intersection1Geometry';
@@ -202,7 +203,7 @@ export default function CoordinatedView({ sim }) {
       <View style={styles.sectionHeaderRow}>
         <Waypoints size={16} color="#38bdf8" style={{ marginRight: 6 }} />
         <Text style={styles.sectionHeader}>
-          Intersecția 1 (Referință: t = {Math.round(simTime % T1)}s)
+          Intersecția 1 (Referință: t = {Math.round(simTime % T1)}s • T₁ = {formatMinutesSeconds(T1)})
         </Text>
       </View>
       <IntersectionVisualizer
@@ -218,7 +219,7 @@ export default function CoordinatedView({ sim }) {
       <View style={[styles.sectionHeaderRow, { marginTop: 24 }]}>
         <Waypoints size={16} color="#38bdf8" style={{ marginRight: 6 }} />
         <Text style={styles.sectionHeader}>
-          Intersecția 2 (Decalată cu φ: t₂ = {Math.round((simTime + phi) % T2)}s)
+          Intersecția 2 (Decalată cu φ: t₂ = {Math.round((simTime + phi) % T2)}s • T₂ = {formatMinutesSeconds(T2)})
         </Text>
       </View>
       <IntersectionVisualizer

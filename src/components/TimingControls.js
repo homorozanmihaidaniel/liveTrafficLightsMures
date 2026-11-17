@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { Play, Pause, RotateCcw, Sliders, Waypoints, Palette } from 'lucide-react-native';
+import { formatMinutesSeconds } from '../utils/formatters';
 import { INTERSECTIONS } from '../data/intersections';
 
 export default function TimingControls({
@@ -161,7 +163,7 @@ export default function TimingControls({
               <Text style={styles.phiTitle}>Decalaj de Fază φ (Fi)</Text>
             </View>
             <Text style={styles.phiSubtext}>
-              Interval: [-T/2, T/2] = [{minPhi}s, +{maxPhi}s] (T = {T_ref}s)
+              Interval: [-T/2, T/2] = [{minPhi}s, +{maxPhi}s] (T = {formatMinutesSeconds(T_ref)})
             </Text>
           </View>
           <View style={styles.phiValueBadge}>
@@ -249,67 +251,99 @@ export default function TimingControls({
             </Text>
           </View>
           <Text style={styles.periodBadge}>
-            T₁ = {T1}s (2m 20s)
+            T₁ = {formatMinutesSeconds(T1)}
           </Text>
         </View>
         <Text style={styles.helperText}>
-          Modifică secundele de verde pentru fiecare direcție și timpul de galben:
+          Modifică secundele de verde pentru fiecare direcție și timpul de galben (glisor sau butoane):
         </Text>
 
         {INTERSECTIONS[0].phases.map((ph, idx) => (
-          <View key={ph.id} style={styles.timingItemRow}>
-            <View style={styles.phaseLabelContainer}>
-              <View
-                style={[styles.smallDot, { backgroundColor: ph.sketchColor }]}
-              />
-              <Text style={styles.phaseItemName}>
-                Faza {ph.id} ({ph.themeName}):
-              </Text>
+          <View key={ph.id} style={styles.timingItemCard}>
+            <View style={styles.timingItemRow}>
+              <View style={styles.phaseLabelContainer}>
+                <View
+                  style={[styles.smallDot, { backgroundColor: ph.sketchColor }]}
+                />
+                <Text style={styles.phaseItemName}>
+                  Faza {ph.id} ({ph.themeName}):
+                </Text>
+              </View>
+
+              <View style={styles.stepperContainer}>
+                <TouchableOpacity
+                  style={styles.stepBtn}
+                  onPress={() =>
+                    updatePhaseDuration('int1', idx, int1Phases[idx] - 5)
+                  }
+                >
+                  <Text style={styles.stepBtnText}>-5</Text>
+                </TouchableOpacity>
+                <Text style={styles.durationValue}>{int1Phases[idx]}s</Text>
+                <TouchableOpacity
+                  style={styles.stepBtn}
+                  onPress={() =>
+                    updatePhaseDuration('int1', idx, int1Phases[idx] + 5)
+                  }
+                >
+                  <Text style={styles.stepBtnText}>+5</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={styles.stepperContainer}>
-              <TouchableOpacity
-                style={styles.stepBtn}
-                onPress={() =>
-                  updatePhaseDuration('int1', idx, int1Phases[idx] - 5)
-                }
-              >
-                <Text style={styles.stepBtnText}>-5</Text>
-              </TouchableOpacity>
-              <Text style={styles.durationValue}>{int1Phases[idx]}s</Text>
-              <TouchableOpacity
-                style={styles.stepBtn}
-                onPress={() =>
-                  updatePhaseDuration('int1', idx, int1Phases[idx] + 5)
-                }
-              >
-                <Text style={styles.stepBtnText}>+5</Text>
-              </TouchableOpacity>
-            </View>
+            <Slider
+              style={styles.inlineSlider}
+              minimumValue={5}
+              maximumValue={120}
+              step={1}
+              value={int1Phases[idx]}
+              onValueChange={(val) =>
+                updatePhaseDuration('int1', idx, Math.round(val))
+              }
+              minimumTrackTintColor={ph.sketchColor || '#38bdf8'}
+              maximumTrackTintColor="#334155"
+              thumbTintColor={ph.sketchColor || '#38bdf8'}
+            />
           </View>
         ))}
 
         {/* Timp Galben Intersecția 1 */}
-        <View style={[styles.timingItemRow, styles.yellowRow]}>
-          <View style={styles.phaseLabelContainer}>
-            <View style={[styles.smallDot, { backgroundColor: '#f59e0b' }]} />
-            <Text style={styles.phaseItemName}>Timp Galben (Tranziție):</Text>
+        <View style={[styles.timingItemCard, styles.yellowCard]}>
+          <View style={styles.timingItemRow}>
+            <View style={styles.phaseLabelContainer}>
+              <View style={[styles.smallDot, { backgroundColor: '#f59e0b' }]} />
+              <Text style={styles.phaseItemName}>Timp Galben (Tranziție):</Text>
+            </View>
+            <View style={styles.stepperContainer}>
+              <TouchableOpacity
+                style={styles.stepBtn}
+                onPress={() => updateYellowDuration('int1', int1Yellow - 1)}
+              >
+                <Text style={styles.stepBtnText}>-1</Text>
+              </TouchableOpacity>
+              <Text style={styles.durationValue}>{int1Yellow}s</Text>
+              <TouchableOpacity
+                style={styles.stepBtn}
+                onPress={() => updateYellowDuration('int1', int1Yellow + 1)}
+              >
+                <Text style={styles.stepBtnText}>+1</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.stepperContainer}>
-            <TouchableOpacity
-              style={styles.stepBtn}
-              onPress={() => updateYellowDuration('int1', int1Yellow - 1)}
-            >
-              <Text style={styles.stepBtnText}>-1</Text>
-            </TouchableOpacity>
-            <Text style={styles.durationValue}>{int1Yellow}s</Text>
-            <TouchableOpacity
-              style={styles.stepBtn}
-              onPress={() => updateYellowDuration('int1', int1Yellow + 1)}
-            >
-              <Text style={styles.stepBtnText}>+1</Text>
-            </TouchableOpacity>
-          </View>
+
+          <Slider
+            style={styles.inlineSlider}
+            minimumValue={2}
+            maximumValue={15}
+            step={1}
+            value={int1Yellow}
+            onValueChange={(val) =>
+              updateYellowDuration('int1', Math.round(val))
+            }
+            minimumTrackTintColor="#f59e0b"
+            maximumTrackTintColor="#334155"
+            thumbTintColor="#f59e0b"
+          />
         </View>
       </View>
 
@@ -323,7 +357,7 @@ export default function TimingControls({
             </Text>
           </View>
           <Text style={styles.periodBadge}>
-            T₂ = {T2}s (1m 30s)
+            T₂ = {formatMinutesSeconds(T2)}
           </Text>
         </View>
         <Text style={styles.helperText}>
@@ -331,59 +365,91 @@ export default function TimingControls({
         </Text>
 
         {INTERSECTIONS[1].phases.map((ph, idx) => (
-          <View key={ph.id} style={styles.timingItemRow}>
-            <View style={styles.phaseLabelContainer}>
-              <View
-                style={[styles.smallDot, { backgroundColor: ph.sketchColor }]}
-              />
-              <Text style={styles.phaseItemName}>
-                Faza {ph.id} ({ph.themeName}):
-              </Text>
+          <View key={ph.id} style={styles.timingItemCard}>
+            <View style={styles.timingItemRow}>
+              <View style={styles.phaseLabelContainer}>
+                <View
+                  style={[styles.smallDot, { backgroundColor: ph.sketchColor }]}
+                />
+                <Text style={styles.phaseItemName}>
+                  Faza {ph.id} ({ph.themeName}):
+                </Text>
+              </View>
+
+              <View style={styles.stepperContainer}>
+                <TouchableOpacity
+                  style={styles.stepBtn}
+                  onPress={() =>
+                    updatePhaseDuration('int2', idx, int2Phases[idx] - 5)
+                  }
+                >
+                  <Text style={styles.stepBtnText}>-5</Text>
+                </TouchableOpacity>
+                <Text style={styles.durationValue}>{int2Phases[idx]}s</Text>
+                <TouchableOpacity
+                  style={styles.stepBtn}
+                  onPress={() =>
+                    updatePhaseDuration('int2', idx, int2Phases[idx] + 5)
+                  }
+                >
+                  <Text style={styles.stepBtnText}>+5</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={styles.stepperContainer}>
-              <TouchableOpacity
-                style={styles.stepBtn}
-                onPress={() =>
-                  updatePhaseDuration('int2', idx, int2Phases[idx] - 5)
-                }
-              >
-                <Text style={styles.stepBtnText}>-5</Text>
-              </TouchableOpacity>
-              <Text style={styles.durationValue}>{int2Phases[idx]}s</Text>
-              <TouchableOpacity
-                style={styles.stepBtn}
-                onPress={() =>
-                  updatePhaseDuration('int2', idx, int2Phases[idx] + 5)
-                }
-              >
-                <Text style={styles.stepBtnText}>+5</Text>
-              </TouchableOpacity>
-            </View>
+            <Slider
+              style={styles.inlineSlider}
+              minimumValue={5}
+              maximumValue={120}
+              step={1}
+              value={int2Phases[idx]}
+              onValueChange={(val) =>
+                updatePhaseDuration('int2', idx, Math.round(val))
+              }
+              minimumTrackTintColor={ph.sketchColor || '#38bdf8'}
+              maximumTrackTintColor="#334155"
+              thumbTintColor={ph.sketchColor || '#38bdf8'}
+            />
           </View>
         ))}
 
         {/* Timp Galben Intersecția 2 */}
-        <View style={[styles.timingItemRow, styles.yellowRow]}>
-          <View style={styles.phaseLabelContainer}>
-            <View style={[styles.smallDot, { backgroundColor: '#f59e0b' }]} />
-            <Text style={styles.phaseItemName}>Timp Galben (Tranziție):</Text>
+        <View style={[styles.timingItemCard, styles.yellowCard]}>
+          <View style={styles.timingItemRow}>
+            <View style={styles.phaseLabelContainer}>
+              <View style={[styles.smallDot, { backgroundColor: '#f59e0b' }]} />
+              <Text style={styles.phaseItemName}>Timp Galben (Tranziție):</Text>
+            </View>
+            <View style={styles.stepperContainer}>
+              <TouchableOpacity
+                style={styles.stepBtn}
+                onPress={() => updateYellowDuration('int2', int2Yellow - 1)}
+              >
+                <Text style={styles.stepBtnText}>-1</Text>
+              </TouchableOpacity>
+              <Text style={styles.durationValue}>{int2Yellow}s</Text>
+              <TouchableOpacity
+                style={styles.stepBtn}
+                onPress={() => updateYellowDuration('int2', int2Yellow + 1)}
+              >
+                <Text style={styles.stepBtnText}>+1</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.stepperContainer}>
-            <TouchableOpacity
-              style={styles.stepBtn}
-              onPress={() => updateYellowDuration('int2', int2Yellow - 1)}
-            >
-              <Text style={styles.stepBtnText}>-1</Text>
-            </TouchableOpacity>
-            <Text style={styles.durationValue}>{int2Yellow}s</Text>
-            <TouchableOpacity
-              style={styles.stepBtn}
-              onPress={() => updateYellowDuration('int2', int2Yellow + 1)}
-            >
-              <Text style={styles.stepBtnText}>+1</Text>
-            </TouchableOpacity>
-          </View>
+
+          <Slider
+            style={styles.inlineSlider}
+            minimumValue={2}
+            maximumValue={15}
+            step={1}
+            value={int2Yellow}
+            onValueChange={(val) =>
+              updateYellowDuration('int2', Math.round(val))
+            }
+            minimumTrackTintColor="#f59e0b"
+            maximumTrackTintColor="#334155"
+            thumbTintColor="#f59e0b"
+          />
         </View>
       </View>
 
@@ -626,13 +692,27 @@ const styles = StyleSheet.create({
   toggleBtnTextActive: {
     color: '#ffffff',
   },
+  timingItemCard: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
+  },
+  inlineSlider: {
+    width: '100%',
+    height: 32,
+    marginTop: 4,
+  },
+  yellowCard: {
+    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    borderBottomWidth: 0,
+    marginTop: 6,
+  },
   timingItemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#334155',
   },
   yellowRow: {
     backgroundColor: 'rgba(245, 158, 11, 0.08)',

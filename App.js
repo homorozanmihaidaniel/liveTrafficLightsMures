@@ -23,6 +23,7 @@ import {
   Activity,
 } from 'lucide-react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { formatMinutesSeconds } from './src/utils/formatters';
 import { useTrafficSimulation } from './src/hooks/useTrafficSimulation';
 import { INTERSECTIONS } from './src/data/intersections';
 import { INT1_GEOMETRY } from './src/data/intersection1Geometry';
@@ -124,8 +125,8 @@ export default function App() {
             <Clock size={11} color="#38bdf8" style={{ marginRight: 4 }} />
             <Text style={styles.appSubtitle}>
               {isRealTime
-                ? `${phoneTimeStr} • Secunda ${currentCycleSec}s / ${currentT}s`
-                : `Timp Simulat: ${Math.floor(simTime)}s • Viteză ${speedMultiplier}x`}
+                ? `${phoneTimeStr} • Secunda ${currentCycleSec}s / ${formatMinutesSeconds(currentT)}`
+                : `Timp Simulat: ${Math.floor(simTime)}s • Ciclu: ${formatMinutesSeconds(currentT)} • Viteză ${speedMultiplier}x`}
             </Text>
           </View>
         </View>
@@ -306,7 +307,7 @@ export default function App() {
                     <Text style={styles.phiTitle}>Reglare Decalaj de Fază φ (Fi):</Text>
                   </View>
                   <Text style={styles.phiSub}>
-                    Interval: [-T/2, +T/2] = [{currentMinPhi}s, +{currentMaxPhi}s] • T = {currentT}s
+                    Interval: [-T/2, +T/2] = [{currentMinPhi}s, +{currentMaxPhi}s] • T = {formatMinutesSeconds(currentT)}
                   </Text>
                 </View>
                 <View style={styles.phiBadge}>
@@ -421,7 +422,7 @@ export default function App() {
                     <Text style={styles.phiTitle}>Reglare Decalaj de Fază φ (Fi):</Text>
                   </View>
                   <Text style={styles.phiSub}>
-                    Interval: [-T/2, +T/2] = [{currentMinPhi}s, +{currentMaxPhi}s] • T = {currentT}s
+                    Interval: [-T/2, +T/2] = [{currentMinPhi}s, +{currentMaxPhi}s] • T = {formatMinutesSeconds(currentT)}
                   </Text>
                 </View>
                 <View style={styles.phiBadge}>

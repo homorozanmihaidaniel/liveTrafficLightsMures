@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MapPin, Clock } from 'lucide-react-native';
+import Slider from '@react-native-community/slider';
+import { formatMinutesSeconds } from '../utils/formatters';
 import Svg, {
   Path,
   Rect,
@@ -497,7 +499,7 @@ export default function IntersectionVisualizer({
             </Text>
           </View>
           <Text style={styles.totalPeriodText}>
-            Perioadă Totală T = {state.T}s
+            Perioadă Totală T = {formatMinutesSeconds(state.T)}
           </Text>
         </View>
 
@@ -572,36 +574,68 @@ export default function IntersectionVisualizer({
                     <Text style={styles.pillBtnText}>+</Text>
                   </TouchableOpacity>
                 </View>
+
+                {/* Slidebar pentru reglaj rapid și fin */}
+                <Slider
+                  style={styles.pillSlider}
+                  minimumValue={5}
+                  maximumValue={120}
+                  step={1}
+                  value={currentSec}
+                  onValueChange={(val) =>
+                    onUpdatePhaseDuration(intersection.id, idx, Math.round(val))
+                  }
+                  minimumTrackTintColor={pillColor}
+                  maximumTrackTintColor="#334155"
+                  thumbTintColor={pillColor}
+                />
               </View>
             );
           })}
         </View>
 
-        {/* Timp Galben de Eliberare */}
+        {/* Timp Galben de Eliberare cu Stepper și Slidebar */}
         <View style={styles.yellowDirectRow}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={[styles.miniDot, { backgroundColor: '#f59e0b' }]} />
-            <Text style={styles.yellowLabel}>Timp Galben (Tranziție):</Text>
+          <View style={styles.yellowTopRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={[styles.miniDot, { backgroundColor: '#f59e0b' }]} />
+              <Text style={styles.yellowLabel}>Timp Galben (Tranziție):</Text>
+            </View>
+            <View style={styles.yellowStepper}>
+              <TouchableOpacity
+                style={styles.yellowBtn}
+                onPress={() =>
+                  onUpdateYellowDuration(intersection.id, yellowDuration - 1)
+                }
+              >
+                <Text style={styles.yellowBtnText}>−</Text>
+              </TouchableOpacity>
+              <Text style={styles.yellowSeconds}>{yellowDuration}s</Text>
+              <TouchableOpacity
+                style={styles.yellowBtn}
+                onPress={() =>
+                  onUpdateYellowDuration(intersection.id, yellowDuration + 1)
+                }
+              >
+                <Text style={styles.yellowBtnText}>+</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.yellowStepper}>
-            <TouchableOpacity
-              style={styles.yellowBtn}
-              onPress={() =>
-                onUpdateYellowDuration(intersection.id, yellowDuration - 1)
-              }
-            >
-              <Text style={styles.yellowBtnText}>−</Text>
-            </TouchableOpacity>
-            <Text style={styles.yellowSeconds}>{yellowDuration}s</Text>
-            <TouchableOpacity
-              style={styles.yellowBtn}
-              onPress={() =>
-                onUpdateYellowDuration(intersection.id, yellowDuration + 1)
-              }
-            >
-              <Text style={styles.yellowBtnText}>+</Text>
-            </TouchableOpacity>
-          </View>
+
+          {/* Slidebar dedicat pentru Galben */}
+          <Slider
+            style={styles.yellowSlider}
+            minimumValue={2}
+            maximumValue={15}
+            step={1}
+            value={yellowDuration}
+            onValueChange={(val) =>
+              onUpdateYellowDuration(intersection.id, Math.round(val))
+            }
+            minimumTrackTintColor="#f59e0b"
+            maximumTrackTintColor="#334155"
+            thumbTintColor="#f59e0b"
+          />
         </View>
       </View>
     </View>
@@ -805,14 +839,27 @@ const styles = StyleSheet.create({
     minWidth: 36,
     textAlign: 'center',
   },
+  pillSlider: {
+    width: '100%',
+    height: 32,
+    marginTop: 4,
+  },
   yellowDirectRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingTop: 8,
     marginTop: 4,
     borderTopWidth: 1,
     borderTopColor: '#2c374d',
+  },
+  yellowTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  yellowSlider: {
+    width: '100%',
+    height: 32,
+    marginTop: 2,
   },
   yellowLabel: {
     color: '#f59e0b',
