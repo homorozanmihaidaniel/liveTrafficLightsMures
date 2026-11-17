@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Svg, { Rect, Circle, G, Text as SvgText, Line } from 'react-native-svg';
+import { Waves, Clock, CheckCircle2, AlertTriangle, Waypoints } from 'lucide-react-native';
 import IntersectionVisualizer from './IntersectionVisualizer';
 import { INTERSECTIONS } from '../data/intersections';
 import { INT1_GEOMETRY } from '../data/intersection1Geometry';
@@ -39,11 +40,15 @@ export default function CoordinatedView({ sim }) {
       {/* Banner explicativ Coordonare & Parametru Fi */}
       <View style={styles.summaryCard}>
         <View style={styles.titleRow}>
-          <Text style={styles.cardTitle}>🌊 Undă Verde (φ)</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Waves size={18} color="#38bdf8" style={{ marginRight: 6 }} />
+            <Text style={styles.cardTitle}>Undă Verde (φ)</Text>
+          </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             {isRealTime && (
               <View style={styles.liveBadge}>
-                <Text style={styles.liveBadgeText}>🕒 {phoneTimeStr}</Text>
+                <Clock size={11} color="#38bdf8" style={{ marginRight: 4 }} />
+                <Text style={styles.liveBadgeText}>{phoneTimeStr}</Text>
               </View>
             )}
             <View style={styles.distBadge}>
@@ -69,10 +74,12 @@ export default function CoordinatedView({ sim }) {
             },
           ]}
         >
-          <Text style={styles.waveStatusIcon}>
-            {isGreenWaveAchieved ? '🟢' : '🔴'}
-          </Text>
-          <View style={{ flex: 1, marginLeft: 8 }}>
+          {isGreenWaveAchieved ? (
+            <CheckCircle2 size={24} color="#10b981" />
+          ) : (
+            <AlertTriangle size={24} color="#ef4444" />
+          )}
+          <View style={{ flex: 1, marginLeft: 10 }}>
             <Text
               style={[
                 styles.waveStatusTitle,
@@ -192,9 +199,12 @@ export default function CoordinatedView({ sim }) {
       </View>
 
       {/* Cele două intersecții rulate simultan */}
-      <Text style={styles.sectionHeader}>
-        🚦 Intersecția 1 (Referință: t = {Math.round(simTime % T1)}s)
-      </Text>
+      <View style={styles.sectionHeaderRow}>
+        <Waypoints size={16} color="#38bdf8" style={{ marginRight: 6 }} />
+        <Text style={styles.sectionHeader}>
+          Intersecția 1 (Referință: t = {Math.round(simTime % T1)}s)
+        </Text>
+      </View>
       <IntersectionVisualizer
         intersection={INTERSECTIONS[0]}
         geometry={INT1_GEOMETRY}
@@ -205,9 +215,12 @@ export default function CoordinatedView({ sim }) {
         onUpdateYellowDuration={sim.updateYellowDuration}
       />
 
-      <Text style={[styles.sectionHeader, { marginTop: 24 }]}>
-        🚦 Intersecția 2 (Decalată cu φ: t₂ = {Math.round((simTime + phi) % T2)}s)
-      </Text>
+      <View style={[styles.sectionHeaderRow, { marginTop: 24 }]}>
+        <Waypoints size={16} color="#38bdf8" style={{ marginRight: 6 }} />
+        <Text style={styles.sectionHeader}>
+          Intersecția 2 (Decalată cu φ: t₂ = {Math.round((simTime + phi) % T2)}s)
+        </Text>
+      </View>
       <IntersectionVisualizer
         intersection={INTERSECTIONS[1]}
         geometry={INT2_GEOMETRY}
@@ -323,11 +336,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
   sectionHeader: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#f8fafc',
-    marginBottom: 6,
   },
   liveBadge: {
     backgroundColor: '#1e293b',

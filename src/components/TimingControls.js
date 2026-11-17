@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { Play, Pause, RotateCcw, Sliders, Waypoints, Palette } from 'lucide-react-native';
 import { INTERSECTIONS } from '../data/intersections';
 
 export default function TimingControls({
@@ -41,14 +42,22 @@ export default function TimingControls({
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* 1. Bara de Control Redare Simulare */}
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>⏯️ Control Simulare Trafic</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+          <Sliders size={16} color="#38bdf8" style={{ marginRight: 6 }} />
+          <Text style={styles.sectionTitle}>Control Simulare Trafic</Text>
+        </View>
         <View style={styles.playbackRow}>
           <TouchableOpacity
             style={[styles.playButton, isRunning ? styles.pauseBtn : styles.playBtn]}
             onPress={togglePlayPause}
           >
+            {isRunning ? (
+              <Pause size={15} color="#ffffff" fill="#ffffff" style={{ marginRight: 6 }} />
+            ) : (
+              <Play size={15} color="#ffffff" fill="#ffffff" style={{ marginRight: 6 }} />
+            )}
             <Text style={styles.playButtonText}>
-              {isRunning ? '⏸️ Pauză' : '▶️ Pornește'}
+              {isRunning ? 'Pauză' : 'Pornește'}
             </Text>
           </TouchableOpacity>
 
@@ -70,7 +79,8 @@ export default function TimingControls({
             style={styles.actionBtn}
             onPress={resetSimulation}
           >
-            <Text style={styles.actionBtnText}>🔄 Reset T=0</Text>
+            <RotateCcw size={12} color="#cbd5e1" style={{ marginRight: 4 }} />
+            <Text style={styles.actionBtnText}>Reset T=0</Text>
           </TouchableOpacity>
         </View>
 
@@ -109,13 +119,14 @@ export default function TimingControls({
               ]}
               onPress={() => setColorMode('sketch')}
             >
+              <Palette size={13} color={colorMode === 'sketch' ? '#ffffff' : '#94a3b8'} style={{ marginRight: 5 }} />
               <Text
                 style={[
                   styles.toggleBtnText,
                   colorMode === 'sketch' && styles.toggleBtnTextActive,
                 ]}
               >
-                🎨 Culori Schiță (V/P/R/A)
+                Culori Schiță (V/P/R/A)
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -125,13 +136,14 @@ export default function TimingControls({
               ]}
               onPress={() => setColorMode('traffic')}
             >
+              <Waypoints size={13} color={colorMode === 'traffic' ? '#ffffff' : '#94a3b8'} style={{ marginRight: 5 }} />
               <Text
                 style={[
                   styles.toggleBtnText,
                   colorMode === 'traffic' && styles.toggleBtnTextActive,
                 ]}
               >
-                🚦 Standard (Verde/Galben)
+                Standard (Verde/Galben)
               </Text>
             </TouchableOpacity>
           </View>
@@ -144,7 +156,10 @@ export default function TimingControls({
       <View style={[styles.sectionCard, styles.phiHighlightCard]}>
         <View style={styles.phiHeaderRow}>
           <View>
-            <Text style={styles.phiTitle}>📐 Decalaj de Fază φ (Fi)</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Sliders size={15} color="#38bdf8" style={{ marginRight: 6 }} />
+              <Text style={styles.phiTitle}>Decalaj de Fază φ (Fi)</Text>
+            </View>
             <Text style={styles.phiSubtext}>
               Interval: [-T/2, T/2] = [{minPhi}s, +{maxPhi}s] (T = {T_ref}s)
             </Text>
@@ -227,9 +242,12 @@ export default function TimingControls({
       {/* 3. Configurare Timpi Intersecția 1 (4 faze) */}
       <View style={styles.sectionCard}>
         <View style={styles.sectionHeaderBetween}>
-          <Text style={styles.sectionTitle}>
-            🚦 Timpi Intersecția 1 (4 Faze)
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Waypoints size={16} color="#38bdf8" style={{ marginRight: 6 }} />
+            <Text style={styles.sectionTitle}>
+              Timpi Intersecția 1 (4 Faze)
+            </Text>
+          </View>
           <Text style={styles.periodBadge}>
             T₁ = {T1}s (2m 20s)
           </Text>
@@ -298,9 +316,12 @@ export default function TimingControls({
       {/* 4. Configurare Timpi Intersecția 2 (3 faze) */}
       <View style={styles.sectionCard}>
         <View style={styles.sectionHeaderBetween}>
-          <Text style={styles.sectionTitle}>
-            🚦 Timpi Intersecția 2 (3 Faze)
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Waypoints size={16} color="#38bdf8" style={{ marginRight: 6 }} />
+            <Text style={styles.sectionTitle}>
+              Timpi Intersecția 2 (3 Faze)
+            </Text>
+          </View>
           <Text style={styles.periodBadge}>
             T₂ = {T2}s (1m 30s)
           </Text>
@@ -371,8 +392,9 @@ export default function TimingControls({
         style={styles.resetDefaultsBtn}
         onPress={resetToDefaults}
       >
+        <RotateCcw size={15} color="#cbd5e1" style={{ marginRight: 6 }} />
         <Text style={styles.resetDefaultsText}>
-          📋 Resetează toți timpii la Valorile din Schițe (2m20s / 1m30s)
+          Resetează toți timpii la Valorile din Schițe (2m20s / 1m30s)
         </Text>
       </TouchableOpacity>
     </ScrollView>
@@ -659,12 +681,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   resetDefaultsBtn: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#0f172a',
     borderWidth: 1.5,
     borderColor: '#475569',
     borderRadius: 12,
     paddingVertical: 14,
-    alignItems: 'center',
     marginTop: 8,
   },
   resetDefaultsText: {

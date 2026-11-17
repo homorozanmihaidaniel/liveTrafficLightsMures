@@ -10,6 +10,19 @@ import {
   Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import {
+  Camera,
+  Clock,
+  Play,
+  Pause,
+  RotateCcw,
+  Waves,
+  Radio,
+  Sliders,
+  Waypoints,
+  Activity,
+} from 'lucide-react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTrafficSimulation } from './src/hooks/useTrafficSimulation';
 import { INTERSECTIONS } from './src/data/intersections';
 import { INT1_GEOMETRY } from './src/data/intersection1Geometry';
@@ -83,28 +96,38 @@ export default function App() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="light" />
 
-      {/* Antet Modernizat cu Comutator Mod Timp Real / Simulare */}
+      {/* Antet cu Pictograme Lucide & Material Community */}
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <View style={styles.titleRow}>
-            <Text style={styles.appTitle}>🚦 Semafoare Tg. Mureș</Text>
+            <MaterialCommunityIcons
+              name="traffic-light"
+              size={20}
+              color="#38bdf8"
+              style={{ marginRight: 6 }}
+            />
+            <Text style={styles.appTitle}>Semafoare Tg. Mureș</Text>
             {isRealTime ? (
               <View style={styles.liveHeaderBadge}>
-                <View style={styles.liveDot} />
+                <Radio size={10} color="#ef4444" style={{ marginRight: 4 }} />
                 <Text style={styles.liveHeaderText}>LIVE</Text>
               </View>
             ) : (
               <View style={styles.simHeaderBadge}>
+                <Sliders size={10} color="#38bdf8" style={{ marginRight: 4 }} />
                 <Text style={styles.simHeaderText}>SIMULARE</Text>
               </View>
             )}
           </View>
 
-          <Text style={styles.appSubtitle}>
-            {isRealTime
-              ? `Ora: ${phoneTimeStr} • Secunda ${currentCycleSec}s / ${currentT}s`
-              : `Timp Simulat: ${Math.floor(simTime)}s • Viteză ${speedMultiplier}x`}
-          </Text>
+          <View style={styles.subRow}>
+            <Clock size={11} color="#38bdf8" style={{ marginRight: 4 }} />
+            <Text style={styles.appSubtitle}>
+              {isRealTime
+                ? `${phoneTimeStr} • Secunda ${currentCycleSec}s / ${currentT}s`
+                : `Timp Simulat: ${Math.floor(simTime)}s • Viteză ${speedMultiplier}x`}
+            </Text>
+          </View>
         </View>
 
         {/* Butoane Header (Schiță & Play/Pause în Simulare) */}
@@ -113,7 +136,8 @@ export default function App() {
             style={styles.sketchBtn}
             onPress={() => setSketchModalVisible(true)}
           >
-            <Text style={styles.sketchBtnText}>📷 Schiță</Text>
+            <Camera size={13} color="#38bdf8" style={{ marginRight: 5 }} />
+            <Text style={styles.sketchBtnText}>Schiță</Text>
           </TouchableOpacity>
 
           {!isRealTime && (
@@ -124,7 +148,11 @@ export default function App() {
               ]}
               onPress={togglePlayPause}
             >
-              <Text style={styles.playBtnText}>{isRunning ? '⏸️' : '▶️'}</Text>
+              {isRunning ? (
+                <Pause size={15} color="#ffffff" fill="#ffffff" />
+              ) : (
+                <Play size={15} color="#ffffff" fill="#ffffff" style={{ marginLeft: 2 }} />
+              )}
             </TouchableOpacity>
           )}
         </View>
@@ -139,14 +167,14 @@ export default function App() {
           ]}
           onPress={() => setClockMode('realtime')}
         >
-          <View style={isRealTime ? styles.pulseDot : styles.inactiveDot} />
+          <Radio size={13} color={isRealTime ? '#ef4444' : '#64748b'} style={{ marginRight: 6 }} />
           <Text
             style={[
               styles.modeBtnText,
               isRealTime && styles.modeBtnTextActive,
             ]}
           >
-            🔴 Timp Real (Ceas Telefon)
+            Timp Real (Ceas Telefon)
           </Text>
         </TouchableOpacity>
 
@@ -157,13 +185,14 @@ export default function App() {
           ]}
           onPress={() => setClockMode('simulated')}
         >
+          <Sliders size={13} color={!isRealTime ? '#38bdf8' : '#64748b'} style={{ marginRight: 6 }} />
           <Text
             style={[
               styles.modeBtnText,
               !isRealTime && styles.modeBtnTextActive,
             ]}
           >
-            🧪 Mod Simulare
+            Mod Simulare
           </Text>
         </TouchableOpacity>
       </View>
@@ -177,13 +206,18 @@ export default function App() {
           ]}
           onPress={() => setSelectedIntersection('int1')}
         >
+          <Waypoints
+            size={13}
+            color={selectedIntersection === 'int1' ? '#ffffff' : '#94a3b8'}
+            style={{ marginRight: 5 }}
+          />
           <Text
             style={[
               styles.selectorTabText,
               selectedIntersection === 'int1' && styles.selectorTabTextActive,
             ]}
           >
-            🚦 Intersecția 1
+            Intersecția 1
           </Text>
         </TouchableOpacity>
 
@@ -194,13 +228,18 @@ export default function App() {
           ]}
           onPress={() => setSelectedIntersection('int2')}
         >
+          <Waypoints
+            size={13}
+            color={selectedIntersection === 'int2' ? '#ffffff' : '#94a3b8'}
+            style={{ marginRight: 5 }}
+          />
           <Text
             style={[
               styles.selectorTabText,
               selectedIntersection === 'int2' && styles.selectorTabTextActive,
             ]}
           >
-            🚦 Intersecția 2
+            Intersecția 2
           </Text>
         </TouchableOpacity>
 
@@ -211,13 +250,18 @@ export default function App() {
           ]}
           onPress={() => setSelectedIntersection('coordinated')}
         >
+          <Waves
+            size={13}
+            color={selectedIntersection === 'coordinated' ? '#ffffff' : '#94a3b8'}
+            style={{ marginRight: 5 }}
+          />
           <Text
             style={[
               styles.selectorTabText,
               selectedIntersection === 'coordinated' && styles.selectorTabTextActive,
             ]}
           >
-            🌊 Undă Verde (φ)
+            Undă Verde (φ)
           </Text>
         </TouchableOpacity>
       </View>
@@ -250,7 +294,6 @@ export default function App() {
                 onCalibratePhase={(phaseIdx) => calibratePhaseNow('int1', phaseIdx)}
                 onFineTune={(delta) => fineTuneOffset('int1', delta)}
                 onResetCalibration={() => resetCalibration('int1')}
-                isRealTime={isRealTime}
               />
             )}
 
@@ -258,7 +301,10 @@ export default function App() {
             <View style={styles.phiCard}>
               <View style={styles.phiHeader}>
                 <View>
-                  <Text style={styles.phiTitle}>📐 Reglare Decalaj de Fază φ (Fi):</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Sliders size={14} color="#38bdf8" style={{ marginRight: 6 }} />
+                    <Text style={styles.phiTitle}>Reglare Decalaj de Fază φ (Fi):</Text>
+                  </View>
                   <Text style={styles.phiSub}>
                     Interval: [-T/2, +T/2] = [{currentMinPhi}s, +{currentMaxPhi}s] • T = {currentT}s
                   </Text>
@@ -318,6 +364,7 @@ export default function App() {
                   </View>
                 ) : (
                   <View style={styles.speedGroup}>
+                    <Activity size={12} color="#38bdf8" style={{ marginRight: 4 }} />
                     <Text style={styles.speedLabel}>Viteză:</Text>
                     <View style={[styles.speedPill, styles.speedPillActive]}>
                       <Text style={[styles.speedPillText, styles.speedPillTextActive]}>
@@ -331,7 +378,8 @@ export default function App() {
                   style={styles.resetBtn}
                   onPress={resetToDefaults}
                 >
-                  <Text style={styles.resetBtnText}>🔄 Reset Schiță</Text>
+                  <RotateCcw size={12} color="#cbd5e1" style={{ marginRight: 5 }} />
+                  <Text style={styles.resetBtnText}>Reset Schiță</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -361,7 +409,6 @@ export default function App() {
                 onCalibratePhase={(phaseIdx) => calibratePhaseNow('int2', phaseIdx)}
                 onFineTune={(delta) => fineTuneOffset('int2', delta)}
                 onResetCalibration={() => resetCalibration('int2')}
-                isRealTime={isRealTime}
               />
             )}
 
@@ -369,7 +416,10 @@ export default function App() {
             <View style={styles.phiCard}>
               <View style={styles.phiHeader}>
                 <View>
-                  <Text style={styles.phiTitle}>📐 Reglare Decalaj de Fază φ (Fi):</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Sliders size={14} color="#38bdf8" style={{ marginRight: 6 }} />
+                    <Text style={styles.phiTitle}>Reglare Decalaj de Fază φ (Fi):</Text>
+                  </View>
                   <Text style={styles.phiSub}>
                     Interval: [-T/2, +T/2] = [{currentMinPhi}s, +{currentMaxPhi}s] • T = {currentT}s
                   </Text>
@@ -429,6 +479,7 @@ export default function App() {
                   </View>
                 ) : (
                   <View style={styles.speedGroup}>
+                    <Activity size={12} color="#38bdf8" style={{ marginRight: 4 }} />
                     <Text style={styles.speedLabel}>Viteză:</Text>
                     <View style={[styles.speedPill, styles.speedPillActive]}>
                       <Text style={[styles.speedPillText, styles.speedPillTextActive]}>
@@ -442,7 +493,8 @@ export default function App() {
                   style={styles.resetBtn}
                   onPress={resetToDefaults}
                 >
-                  <Text style={styles.resetBtnText}>🔄 Reset Schiță</Text>
+                  <RotateCcw size={12} color="#cbd5e1" style={{ marginRight: 5 }} />
+                  <Text style={styles.resetBtnText}>Reset Schiță</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -499,19 +551,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ef4444',
   },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#ef4444',
-    marginRight: 4,
-  },
   liveHeaderText: {
     color: '#ef4444',
     fontSize: 10,
     fontWeight: 'bold',
   },
   simHeaderBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(56, 189, 248, 0.15)',
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -525,10 +572,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
+  subRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
   appSubtitle: {
     fontSize: 12,
     color: '#38bdf8',
-    marginTop: 2,
     fontWeight: '600',
   },
   headerRight: {
@@ -536,6 +587,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sketchBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#1e293b',
     borderWidth: 1,
     borderColor: '#38bdf8',
@@ -561,9 +614,6 @@ const styles = StyleSheet.create({
   },
   pauseBtnActive: {
     backgroundColor: '#22c55e',
-  },
-  playBtnText: {
-    fontSize: 16,
   },
   modeBar: {
     flexDirection: 'row',
@@ -594,20 +644,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#102235',
     borderColor: '#0284c7',
   },
-  pulseDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: '#ef4444',
-    marginRight: 6,
-  },
-  inactiveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#64748b',
-    marginRight: 6,
-  },
   modeBtnText: {
     color: '#94a3b8',
     fontSize: 12,
@@ -627,8 +663,10 @@ const styles = StyleSheet.create({
   },
   selectorTab: {
     flex: 1,
+    flexDirection: 'row',
     paddingVertical: 10,
     alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 10,
     marginHorizontal: 3,
     backgroundColor: '#1c2433',
@@ -638,7 +676,7 @@ const styles = StyleSheet.create({
   },
   selectorTabText: {
     color: '#94a3b8',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
   selectorTabTextActive: {
@@ -745,6 +783,8 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   resetBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#1c2433',
     paddingVertical: 6,
     paddingHorizontal: 12,

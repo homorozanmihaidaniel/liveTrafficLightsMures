@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { MapPin, Clock } from 'lucide-react-native';
 import Svg, {
   Path,
   Rect,
@@ -19,7 +20,9 @@ export default function IntersectionVisualizer({
   onUpdateYellowDuration,
   yellowDuration = 5,
 }) {
-  const { activePhase, signalState, timeRemainingInState } = state;
+  const activePhase = state?.activePhase;
+  const signalState = state?.signalState || 'RED';
+  const timeRemainingInState = state?.timeRemainingInState || 0;
 
   // STRICT doar VERDE, GALBEN sau ROȘU conform cerinței
   const currentActiveColor = useMemo(() => {
@@ -28,9 +31,14 @@ export default function IntersectionVisualizer({
     return '#ef4444';                               // Roșu
   }, [signalState]);
 
-  // Animația de flux continuu a vehiculelor de-a lungul curbelor
-  const flowDashOffset = -(simTime * 80) % 36;
-  const clipId = `roadClip_${intersection.id}`;
+  // Animația de flux continuu a vehiculelor de-a lungul curbelor (protejată împotriva NaN)
+  const safeSimTime = typeof simTime === 'number' && !isNaN(simTime) ? simTime : 0;
+  const flowDashOffset = -(safeSimTime * 80) % 36;
+  const clipId = `roadClip_${intersection?.id || 'default'}`;
+
+  if (!state || !activePhase || !geometry) {
+    return null;
+  }
 
   return (
     <View style={styles.card}>
@@ -38,7 +46,10 @@ export default function IntersectionVisualizer({
       <View style={styles.headerRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>{intersection.name}</Text>
-          <Text style={styles.coordText}>📍 {intersection.coordinates}</Text>
+          <View style={styles.coordRow}>
+            <MapPin size={11} color="#94a3b8" style={{ marginRight: 4 }} />
+            <Text style={styles.coordText}>{intersection.coordinates}</Text>
+          </View>
         </View>
 
         {/* Semnal Rutier (DOAR Verde, Galben sau Roșu) */}
@@ -85,10 +96,10 @@ export default function IntersectionVisualizer({
           { borderLeftColor: currentActiveColor },
         ]}
       >
-        <Text style={styles.phaseBarTitle}>
-          {signalState === 'GREEN' ? '🟢 ' : '🟡 '}
-          {activePhase.name}
-        </Text>
+        <View style={styles.phaseTitleRow}>
+          <View style={[styles.phaseIndicatorDot, { backgroundColor: currentActiveColor }]} />
+          <Text style={styles.phaseBarTitle}>{activePhase.name}</Text>
+        </View>
         <Text style={styles.phaseBarDesc}>{activePhase.flowDescription}</Text>
       </View>
 
@@ -138,19 +149,20 @@ export default function IntersectionVisualizer({
             ))}
 
             {/* COLORAREA DRUMURILOR CARE AU VERDE SAU GALBEN */}
-            {geometry.flows.map((flow) => {
-              const isActive = activePhase.activeFlowIds.includes(flow.id);
+            {geometry.flows && geometry.flows.map((flow, flowIdx) => {
+              const activeFlowIds = activePhase?.activeFlowIds || [];
+              const isActive = activeFlowIds.includes(flow.id);
 
               if (!isActive) {
                 // Drumurile oprite (ROȘU) au doar un contur discret de așteptare
                 return (
                   <Path
-                    key={flow.id}
+                    key={`flow_inact_${flow.id}_${flowIdx}`}
                     d={flow.d}
                     fill="none"
                     stroke="#ef4444"
                     strokeWidth={(flow.strokeWidth || 22) - 6}
-                    strokeOpacity="0.05"
+                    strokeOpacity={0.05}
                     strokeLinecap="round"
                   />
                 );
@@ -158,14 +170,14 @@ export default function IntersectionVisualizer({
 
               // DRUMUL CARE ARE VERDE SAU GALBEN SE COLOREAZĂ PUTERNIC:
               return (
-                <G key={flow.id}>
+                <G key={`flow_act_${flow.id}_${flowIdx}`}>
                   {/* 1. Halo luminos de fundal al carosabilului */}
                   <Path
                     d={flow.d}
                     fill="none"
                     stroke={currentActiveColor}
                     strokeWidth={(flow.strokeWidth || 22) + 10}
-                    strokeOpacity={signalState === 'YELLOW' ? '0.35' : '0.28'}
+                    strokeOpacity={signalState === 'YELLOW' ? 0.35 : 0.28}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -176,7 +188,7 @@ export default function IntersectionVisualizer({
                     fill="none"
                     stroke={currentActiveColor}
                     strokeWidth={flow.strokeWidth || 22}
-                    strokeOpacity={signalState === 'YELLOW' ? '0.85' : '0.95'}
+                    strokeOpacity={signalState === 'YELLOW' ? 0.85 : 0.95}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -186,8 +198,8 @@ export default function IntersectionVisualizer({
                     d={flow.d}
                     fill="none"
                     stroke="#ffffff"
-                    strokeWidth="5"
-                    strokeOpacity={signalState === 'YELLOW' ? '0.75' : '0.95'}
+                    strokeWidth={5}
+                    strokeOpacity={signalState === 'YELLOW' ? 0.75 : 0.95}
                     strokeDasharray="16 20"
                     strokeDashoffset={flowDashOffset}
                     strokeLinecap="round"
@@ -311,15 +323,15 @@ export default function IntersectionVisualizer({
                 strokeWidth="1.5"
                 strokeDasharray="6 4"
               />
-              <SvgText
-                x={geometry.monasteryArea.labelX}
-                y={geometry.monasteryArea.labelY - 14}
-                fill="#38bdf8"
-                fontSize="26"
-                textAnchor="middle"
-              >
-                ⛪
-              </SvgText>
+              <G transform={`translate(${geometry.monasteryArea.labelX}, ${geometry.monasteryArea.labelY - 14})`}>
+                <Path
+                  d="M 0,-10 L 0,8 M -6,-3 L 6,-3"
+                  stroke="#38bdf8"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </G>
               <SvgText
                 x={geometry.monasteryArea.labelX}
                 y={geometry.monasteryArea.labelY + 18}
@@ -365,17 +377,17 @@ export default function IntersectionVisualizer({
           ))}
 
           {/* Treceri de pietoni (Zebre) și Linia de Stop STRICT pe benzile de intrare */}
-          {geometry.crosswalks.map((cw) => {
-            const isArmActive = activePhase.activeBranches.includes(cw.arm);
+          {geometry.crosswalks && geometry.crosswalks.map((cw) => {
+            const isArmActive = activePhase?.activeBranches?.includes(cw.arm);
             return (
-              <G key={cw.id}>
-                {cw.rects.map((r, rIdx) => {
+              <G key={`cw_${cw.id}`}>
+                {cw.rects && cw.rects.map((r, rIdx) => {
                   const stripes = [];
                   const count = Math.floor(r.width / 18);
                   for (let i = 0; i < count; i++) {
                     stripes.push(
                       <Rect
-                        key={`cw_s_${i}`}
+                        key={`cw_s_${cw.id}_${rIdx}_${i}`}
                         x={r.x + i * 18}
                         y={r.y}
                         width={9}
@@ -383,7 +395,7 @@ export default function IntersectionVisualizer({
                         rx={2}
                         ry={2}
                         fill="#f8fafc"
-                        opacity="0.9"
+                        opacity={0.9}
                         transform={
                           r.rotation
                             ? `rotate(${r.rotation}, ${r.x}, ${r.y})`
@@ -392,7 +404,7 @@ export default function IntersectionVisualizer({
                       />
                     );
                   }
-                  return <G key={`r_${rIdx}`}>{stripes}</G>;
+                  return <G key={`cw_r_${cw.id}_${rIdx}`}>{stripes}</G>;
                 })}
 
                 {/* Linia de Stop: ROȘIE când brațul e oprit, VERDE/GALBEN când e deschis */}
@@ -478,9 +490,12 @@ export default function IntersectionVisualizer({
       {/* ============================================================== */}
       <View style={styles.directControlsCard}>
         <View style={styles.directControlsHeader}>
-          <Text style={styles.directControlsTitle}>
-            ⏱️ Schimbă Timpii pe Direcții (Direct pe Hartă):
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Clock size={14} color="#38bdf8" style={{ marginRight: 6 }} />
+            <Text style={styles.directControlsTitle}>
+              Schimbă Timpii pe Direcții (Direct pe Hartă):
+            </Text>
+          </View>
           <Text style={styles.totalPeriodText}>
             Perioadă Totală T = {state.T}s
           </Text>
@@ -618,10 +633,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#f8fafc',
   },
+  coordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
   coordText: {
     fontSize: 12,
     color: '#94a3b8',
-    marginTop: 2,
   },
   statusBadge: {
     flexDirection: 'row',
@@ -654,11 +673,21 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     marginBottom: 12,
   },
+  phaseTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 3,
+  },
+  phaseIndicatorDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
   phaseBarTitle: {
     color: '#f8fafc',
     fontSize: 13,
     fontWeight: 'bold',
-    marginBottom: 2,
   },
   phaseBarDesc: {
     color: '#94a3b8',

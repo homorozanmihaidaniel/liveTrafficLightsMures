@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Radio, Clock, Target, Zap, RotateCcw } from 'lucide-react-native';
 
 export default function RealTimeCalibrationCard({
   intersection,
@@ -22,12 +23,13 @@ export default function RealTimeCalibrationCard({
       {/* Header card */}
       <View style={styles.headerRow}>
         <View style={styles.liveIndicatorRow}>
-          <View style={styles.livePulseDot} />
+          <Radio size={12} color="#ef4444" style={{ marginRight: 6 }} />
           <Text style={styles.liveBadgeText}>SINCRONIZARE LIVE (TIMP REAL)</Text>
         </View>
 
         <View style={styles.phoneClockBadge}>
-          <Text style={styles.phoneClockText}>🕒 {phoneTimeStr}</Text>
+          <Clock size={12} color="#38bdf8" style={{ marginRight: 5 }} />
+          <Text style={styles.phoneClockText}>{phoneTimeStr}</Text>
         </View>
       </View>
 
@@ -48,31 +50,49 @@ export default function RealTimeCalibrationCard({
 
         <View style={styles.cycleInfoItem}>
           <Text style={styles.infoLabel}>Faza curentă</Text>
-          <Text
-            style={[
-              styles.infoValue,
-              { color: signalState === 'GREEN' ? '#22c55e' : '#f59e0b' },
-            ]}
-          >
-            {signalState === 'GREEN' ? '🟢 VERDE' : '🟡 GALBEN'} ({Math.ceil(timeRemainingInState)}s)
-          </Text>
+          <View style={styles.phaseStateRow}>
+            <View
+              style={[
+                styles.signalIndicatorDot,
+                { backgroundColor: signalState === 'GREEN' ? '#22c55e' : '#f59e0b' },
+              ]}
+            />
+            <Text
+              style={[
+                styles.infoValue,
+                { color: signalState === 'GREEN' ? '#22c55e' : '#f59e0b' },
+              ]}
+            >
+              {signalState === 'GREEN' ? 'VERDE' : 'GALBEN'} ({Math.ceil(timeRemainingInState)}s)
+            </Text>
+          </View>
         </View>
 
         <View style={styles.cycleInfoDivider} />
 
         <View style={styles.cycleInfoItem}>
           <Text style={styles.infoLabel}>Stare calibrare</Text>
-          <Text style={styles.calibStatusText}>
-            {lastCalibratedTime ? `🎯 ${lastCalibratedTime}` : '🕒 Miezul nopții'}
-          </Text>
+          <View style={styles.calibStatusRow}>
+            {lastCalibratedTime ? (
+              <Target size={11} color="#38bdf8" style={{ marginRight: 4 }} />
+            ) : (
+              <Clock size={11} color="#94a3b8" style={{ marginRight: 4 }} />
+            )}
+            <Text style={styles.calibStatusText}>
+              {lastCalibratedTime ? lastCalibratedTime : 'Miezul nopții'}
+            </Text>
+          </View>
         </View>
       </View>
 
       {/* Secțiunea Calibrare 1-Tap la fața locului */}
       <View style={styles.syncSection}>
-        <Text style={styles.syncSectionTitle}>
-          🎯 Calibrare la fața locului (când ești în intersecție):
-        </Text>
+        <View style={styles.syncSectionHeader}>
+          <Target size={14} color="#38bdf8" style={{ marginRight: 6 }} />
+          <Text style={styles.syncSectionTitle}>
+            Calibrare la fața locului (când ești în intersecție):
+          </Text>
+        </View>
         <Text style={styles.syncSectionSubtitle}>
           Alege faza pe care o vezi aprinsă și apasă butonul în momentul în care trece pe verde:
         </Text>
@@ -115,9 +135,12 @@ export default function RealTimeCalibrationCard({
           onPress={() => onCalibratePhase(selectedPhaseToSync)}
           activeOpacity={0.8}
         >
-          <Text style={styles.mainSyncButtonText}>
-            ⚡ SEMAFORUL A TRECUT PE VERDE LA FAZA {selectedPhaseToSync + 1} ACUM!
-          </Text>
+          <View style={styles.mainSyncButtonContent}>
+            <Zap size={15} color="#ffffff" fill="#ffffff" style={{ marginRight: 6 }} />
+            <Text style={styles.mainSyncButtonText}>
+              SEMAFORUL A TRECUT PE VERDE LA FAZA {selectedPhaseToSync + 1} ACUM!
+            </Text>
+          </View>
           <Text style={styles.mainSyncButtonSub}>
             (Apasă exact în secunda în care se aprinde verdele la {intersection.phases[selectedPhaseToSync]?.name})
           </Text>
@@ -161,7 +184,8 @@ export default function RealTimeCalibrationCard({
                 style={styles.resetCalibBtn}
                 onPress={onResetCalibration}
               >
-                <Text style={styles.resetCalibBtnText}>🔄 Reset</Text>
+                <RotateCcw size={11} color="#cbd5e1" style={{ marginRight: 4 }} />
+                <Text style={styles.resetCalibBtnText}>Reset</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -196,13 +220,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.3)',
   },
-  livePulseDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ef4444',
-    marginRight: 6,
-  },
   liveBadgeText: {
     color: '#ef4444',
     fontSize: 11,
@@ -210,6 +227,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   phoneClockBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#1e293b',
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -262,10 +281,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: 'bold',
   },
+  phaseStateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  signalIndicatorDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    marginRight: 5,
+  },
   infoValueSub: {
     color: '#64748b',
     fontSize: 11,
     fontWeight: 'normal',
+  },
+  calibStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   calibStatusText: {
     color: '#38bdf8',
@@ -279,11 +312,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#1e293b',
   },
+  syncSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 3,
+  },
   syncSectionTitle: {
     color: '#f1f5f9',
     fontSize: 13,
     fontWeight: 'bold',
-    marginBottom: 3,
   },
   syncSectionSubtitle: {
     color: '#94a3b8',
@@ -335,9 +372,14 @@ const styles = StyleSheet.create({
     borderColor: '#22c55e',
     marginBottom: 12,
   },
+  mainSyncButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   mainSyncButtonText: {
     color: '#ffffff',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 'bold',
     textAlign: 'center',
     letterSpacing: 0.3,
@@ -381,6 +423,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   resetCalibBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#334155',
     paddingHorizontal: 10,
     paddingVertical: 5,
