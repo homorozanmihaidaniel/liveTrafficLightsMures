@@ -161,6 +161,14 @@ export const INT1_GEOMETRY = {
       arm: 'south',
     },
     {
+      id: 'flow_s_w',
+      phaseId: 2,
+      name: 'Sud -> Sud (Jos)',
+      d: 'M 507 953 C 824 676 437 523 411 486 C 228 353 158 575 -14 726',
+      strokeWidth: 20,
+      arm: 'south',
+    },
+    {
       id: 'flow_s_e_1',
       phaseId: 2,
       name: 'Sud -> Est (Dreapta banda 1)',
