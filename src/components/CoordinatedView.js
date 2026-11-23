@@ -114,7 +114,13 @@ export default function CoordinatedView({ sim }) {
               <Circle
                 r="22"
                 fill="#1e293b"
-                stroke={int2State.signalState === 'GREEN' ? '#10b981' : '#f59e0b'}
+                stroke={
+                  int2State.signalState === 'GREEN'
+                    ? '#10b981'
+                    : int2State.signalState === 'YELLOW'
+                    ? '#f59e0b'
+                    : '#ef4444'
+                }
                 strokeWidth="3"
               />
               <SvgText x="0" y="4" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle">
@@ -130,7 +136,13 @@ export default function CoordinatedView({ sim }) {
               <Circle
                 r="22"
                 fill="#1e293b"
-                stroke={int1State.signalState === 'GREEN' ? '#10b981' : '#f59e0b'}
+                stroke={
+                  int1State.signalState === 'GREEN'
+                    ? '#10b981'
+                    : int1State.signalState === 'YELLOW'
+                    ? '#f59e0b'
+                    : '#ef4444'
+                }
                 strokeWidth="3"
               />
               <SvgText x="0" y="4" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle">

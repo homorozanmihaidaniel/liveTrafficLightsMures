@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MapPin, Clock } from 'lucide-react-native';
 import Slider from '@react-native-community/slider';
 import { formatMinutesSeconds } from '../utils/formatters';
+import CycleProgressBar from './CycleProgressBar';
 import Svg, {
   Path,
   Rect,
@@ -54,7 +55,7 @@ export default function IntersectionVisualizer({
           </View>
         </View>
 
-        {/* Semnal Rutier (DOAR Verde, Galben sau Roșu) */}
+        {/* Semnal Rutier (Verde, Galben sau Punct Mort / Toate Roșii) */}
         <View
           style={[
             styles.statusBadge,
@@ -62,9 +63,15 @@ export default function IntersectionVisualizer({
               backgroundColor:
                 signalState === 'GREEN'
                   ? 'rgba(34, 197, 94, 0.16)'
-                  : 'rgba(245, 158, 11, 0.2)',
+                  : signalState === 'YELLOW'
+                  ? 'rgba(245, 158, 11, 0.2)'
+                  : 'rgba(239, 68, 68, 0.2)',
               borderColor:
-                signalState === 'GREEN' ? '#22c55e' : '#f59e0b',
+                signalState === 'GREEN'
+                  ? '#22c55e'
+                  : signalState === 'YELLOW'
+                  ? '#f59e0b'
+                  : '#ef4444',
             },
           ]}
         >
@@ -73,17 +80,32 @@ export default function IntersectionVisualizer({
               styles.statusDot,
               {
                 backgroundColor:
-                  signalState === 'GREEN' ? '#22c55e' : '#f59e0b',
+                  signalState === 'GREEN'
+                    ? '#22c55e'
+                    : signalState === 'YELLOW'
+                    ? '#f59e0b'
+                    : '#ef4444',
               },
             ]}
           />
           <Text
             style={[
               styles.statusText,
-              { color: signalState === 'GREEN' ? '#22c55e' : '#f59e0b' },
+              {
+                color:
+                  signalState === 'GREEN'
+                    ? '#22c55e'
+                    : signalState === 'YELLOW'
+                    ? '#f59e0b'
+                    : '#ef4444',
+              },
             ]}
           >
-            {signalState === 'GREEN' ? 'VERDE' : 'GALBEN'}
+            {signalState === 'GREEN'
+              ? 'VERDE'
+              : signalState === 'YELLOW'
+              ? 'GALBEN'
+              : 'PUNCT MORT'}
           </Text>
           <Text style={styles.timerNumber}>
             {Math.ceil(timeRemainingInState)}s
@@ -100,10 +122,25 @@ export default function IntersectionVisualizer({
       >
         <View style={styles.phaseTitleRow}>
           <View style={[styles.phaseIndicatorDot, { backgroundColor: currentActiveColor }]} />
-          <Text style={styles.phaseBarTitle}>{activePhase.name}</Text>
+          <Text style={styles.phaseBarTitle}>
+            {signalState === 'ALL_RED'
+              ? `Punct Mort (Toate Roșii) • Urmează: ${state.nextPhase?.branchName || state.nextPhase?.name || 'Faza Următoare'}`
+              : activePhase.name}
+          </Text>
         </View>
-        <Text style={styles.phaseBarDesc}>{activePhase.flowDescription}</Text>
+        <Text style={styles.phaseBarDesc}>
+          {signalState === 'ALL_RED'
+            ? 'Nicio direcție nu are verde. Punct mort pentru degajarea în siguranță a intersecției.'
+            : activePhase.flowDescription}
+        </Text>
       </View>
+
+      {/* Bară Progres Ciclu Mare (cu fazele verzi și galbene distincte) */}
+      <CycleProgressBar
+        intersection={intersection}
+        state={state}
+        yellowDuration={yellowDuration}
+      />
 
       {/* Harta Vizuală cu Mască de Tăiere (ClipPath) ce ține toate liniile STRICT în interiorul drumului */}
       <View style={styles.mapWrapper}>
@@ -152,7 +189,8 @@ export default function IntersectionVisualizer({
 
             {/* COLORAREA DRUMURILOR CARE AU VERDE SAU GALBEN */}
             {geometry.flows && geometry.flows.map((flow, flowIdx) => {
-              const activeFlowIds = activePhase?.activeFlowIds || [];
+              const activeFlowIds =
+                signalState === 'ALL_RED' ? [] : (activePhase?.activeFlowIds || []);
               const isActive = activeFlowIds.includes(flow.id);
 
               if (!isActive) {
@@ -380,7 +418,8 @@ export default function IntersectionVisualizer({
 
           {/* Treceri de pietoni (Zebre) și Linia de Stop STRICT pe benzile de intrare */}
           {geometry.crosswalks && geometry.crosswalks.map((cw) => {
-            const isArmActive = activePhase?.activeBranches?.includes(cw.arm);
+            const isArmActive =
+              signalState === 'ALL_RED' ? false : activePhase?.activeBranches?.includes(cw.arm);
             return (
               <G key={`cw_${cw.id}`}>
                 {cw.rects && cw.rects.map((r, rIdx) => {

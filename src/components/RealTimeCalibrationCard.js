@@ -55,16 +55,35 @@ export default function RealTimeCalibrationCard({
             <View
               style={[
                 styles.signalIndicatorDot,
-                { backgroundColor: signalState === 'GREEN' ? '#22c55e' : '#f59e0b' },
+                {
+                  backgroundColor:
+                    signalState === 'GREEN'
+                      ? '#22c55e'
+                      : signalState === 'YELLOW'
+                      ? '#f59e0b'
+                      : '#ef4444',
+                },
               ]}
             />
             <Text
               style={[
                 styles.infoValue,
-                { color: signalState === 'GREEN' ? '#22c55e' : '#f59e0b' },
+                {
+                  color:
+                    signalState === 'GREEN'
+                      ? '#22c55e'
+                      : signalState === 'YELLOW'
+                      ? '#f59e0b'
+                      : '#ef4444',
+                },
               ]}
             >
-              {signalState === 'GREEN' ? 'VERDE' : 'GALBEN'} ({Math.ceil(timeRemainingInState)}s)
+              {signalState === 'GREEN'
+                ? 'VERDE'
+                : signalState === 'YELLOW'
+                ? 'GALBEN'
+                : 'PUNCT MORT'}{' '}
+              ({Math.ceil(timeRemainingInState)}s)
             </Text>
           </View>
         </View>

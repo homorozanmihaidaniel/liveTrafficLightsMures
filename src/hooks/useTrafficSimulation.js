@@ -316,10 +316,18 @@ export function useTrafficSimulation() {
       let t = cycleTime % T;
       if (t < 0) t += T;
 
+      // Împărțirea tranziției (yellowDur, de regulă 5s) conform normelor rutiere:
+      // - Galben de avertizare: 3s (sau jumătate din yellowDur)
+      // - Roșu General / Punct Mort (All-Red clearance): restul de 2s în care NIMENI nu are verde!
+      const yellowOnlyDur = yellowDur >= 4 ? 3 : Math.max(1, Math.floor(yellowDur / 2));
+      const allRedDur = Math.max(0, yellowDur - yellowOnlyDur);
+
       let accumulated = 0;
       let activePhase = null;
       let activePhaseIndex = 0;
-      let signalState = 'RED'; // 'GREEN' | 'YELLOW' | 'RED'
+      let nextPhase = null;
+      let nextPhaseIndex = 0;
+      let signalState = 'RED'; // 'GREEN' | 'YELLOW' | 'ALL_RED'
       let timeRemainingInState = 0;
       let phaseTimeRemaining = 0;
 
@@ -328,18 +336,26 @@ export function useTrafficSimulation() {
         const phaseTotal = greenDur + yellowDur;
         const phaseStart = accumulated;
         const greenEnd = phaseStart + greenDur;
+        const yellowEnd = greenEnd + yellowOnlyDur;
         const phaseEnd = phaseStart + phaseTotal;
 
         if (t >= phaseStart && t < phaseEnd) {
           activePhaseIndex = i;
           activePhase = intersectionDef.phases[i];
+          nextPhaseIndex = (i + 1) % phaseDurations.length;
+          nextPhase = intersectionDef.phases[nextPhaseIndex];
 
           if (t < greenEnd) {
             signalState = 'GREEN';
             timeRemainingInState = greenEnd - t;
             phaseTimeRemaining = phaseEnd - t;
-          } else {
+          } else if (t < yellowEnd) {
             signalState = 'YELLOW';
+            timeRemainingInState = yellowEnd - t;
+            phaseTimeRemaining = phaseEnd - t;
+          } else {
+            // Punct mort (toate roșii pentru degajarea intersecției)
+            signalState = 'ALL_RED';
             timeRemainingInState = phaseEnd - t;
             phaseTimeRemaining = phaseEnd - t;
           }
@@ -351,6 +367,7 @@ export function useTrafficSimulation() {
       if (!activePhase) {
         activePhaseIndex = 0;
         activePhase = intersectionDef.phases[0];
+        nextPhase = intersectionDef.phases[1] || intersectionDef.phases[0];
         signalState = 'GREEN';
         timeRemainingInState = phaseDurations[0];
         phaseTimeRemaining = phaseDurations[0] + yellowDur;
@@ -361,9 +378,12 @@ export function useTrafficSimulation() {
         currentCycleTime: t,
         activePhaseIndex,
         activePhase,
+        nextPhase,
         signalState,
         phaseDurations,
         yellowDuration: yellowDur,
+        yellowOnlyDuration: yellowOnlyDur,
+        allRedDuration: allRedDur,
         timeRemainingInState: Math.max(0, timeRemainingInState),
         phaseTimeRemaining: Math.max(0, phaseTimeRemaining),
         progress: (t / T) * 100,
