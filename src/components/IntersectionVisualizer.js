@@ -247,7 +247,40 @@ export default function IntersectionVisualizer({
               </G>
             ))}
 
-          {/* Insulă triunghiulară dacă există */}
+          {/* Parcare marcată "P" cu locuri de parcare oblice (randată ÎNAINTE de insulă pentru a fi în spatele ei) */}
+          {geometry.parkingArea && (
+            <G>
+              <Polygon
+                points={geometry.parkingArea.points}
+                fill="#1a2332"
+                stroke="#475569"
+                strokeWidth="2"
+                strokeDasharray="4 4"
+              />
+              {geometry.parkingArea.stalls &&
+                geometry.parkingArea.stalls.map((stl, sIdx) => (
+                  <Path
+                    key={`stl_${sIdx}`}
+                    d={stl}
+                    fill="none"
+                    stroke="#64748b"
+                    strokeWidth="1.5"
+                  />
+                ))}
+              <SvgText
+                x={geometry.parkingArea.labelX}
+                y={geometry.parkingArea.labelY}
+                fill="#94a3b8"
+                fontSize="32"
+                fontWeight="bold"
+                textAnchor="middle"
+              >
+                P
+              </SvgText>
+            </G>
+          )}
+
+          {/* Insulă triunghiulară dacă există (randată DUPĂ parcare pentru a fi deasupra / în față) */}
           {geometry.triangularIsland && (
             <G>
               {geometry.triangularIsland.path ? (
@@ -279,39 +312,6 @@ export default function IntersectionVisualizer({
                     strokeLinecap="round"
                   />
                 ))}
-            </G>
-          )}
-
-          {/* Parcare marcată "P" cu locuri de parcare oblice */}
-          {geometry.parkingArea && (
-            <G>
-              <Polygon
-                points={geometry.parkingArea.points}
-                fill="#1a2332"
-                stroke="#475569"
-                strokeWidth="2"
-                strokeDasharray="4 4"
-              />
-              {geometry.parkingArea.stalls &&
-                geometry.parkingArea.stalls.map((stl, sIdx) => (
-                  <Path
-                    key={`stl_${sIdx}`}
-                    d={stl}
-                    fill="none"
-                    stroke="#64748b"
-                    strokeWidth="1.5"
-                  />
-                ))}
-              <SvgText
-                x={geometry.parkingArea.labelX}
-                y={geometry.parkingArea.labelY}
-                fill="#94a3b8"
-                fontSize="32"
-                fontWeight="bold"
-                textAnchor="middle"
-              >
-                P
-              </SvgText>
             </G>
           )}
 
